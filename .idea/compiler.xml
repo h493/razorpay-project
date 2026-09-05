@@ -12,7 +12,7 @@
         </processorPath>
         <module name="common-library" />
       </profile>
-      <profile name="Annotation profile for merchant-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -20,9 +20,9 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
         <module name="merchant-service" />
-        <module name="operations-service" />
         <module name="payment-service" />
         <module name="vault-service" />
+        <module name="operations-service" />
       </profile>
     </annotationProcessing>
   </component>
