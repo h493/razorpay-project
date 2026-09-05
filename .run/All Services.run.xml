@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All Services" type="CompoundRunConfigurationType">
+    <toRun name="Discovery Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Config Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Merchant Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Payment Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Vault Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Operations Service" type="SpringBootApplicationConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

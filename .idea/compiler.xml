@@ -29,6 +29,8 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="common-library" options="-parameters" />
+      <module name="config-service" options="-parameters" />
+      <module name="discovery-service" options="-parameters" />
       <module name="merchant-service" options="-parameters" />
       <module name="operations-service" options="-parameters" />
       <module name="payment-service" options="-parameters" />

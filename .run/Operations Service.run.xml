@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Operations Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="operations-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.operations_service.OperationsServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

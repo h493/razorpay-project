@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Merchant Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="merchant-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.merchant_service.MerchantServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

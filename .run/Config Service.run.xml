@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Config Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="config-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.config_service.ConfigServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

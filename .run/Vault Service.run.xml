@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Vault Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="vault-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.vault_service.VaultServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
