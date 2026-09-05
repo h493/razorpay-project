@@ -1,20 +1,19 @@
-package com.himanshu.razorpay.payment_service.processor.strategy;
+package com.himanshu.razorpay.vault_service.processor;
 
-import com.himanshu.razorpay.common_library.util.RandomizerUtil;
-import com.himanshu.razorpay.payment_service.processor.PaymentProcessor;
-import com.himanshu.razorpay.common_library.dto.PaymentProcessorRequest;
 import com.himanshu.razorpay.common_library.dto.PaymentProcessorResponse;
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorRequest;
+import com.himanshu.razorpay.common_library.util.RandomizerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class CardPaymentProcessor implements PaymentProcessor {
+public class CardPaymentProcessor {
 
     public static final String PAN_CARD_DECLINED = "40000000000002";
     public static final String PAN_CARD_EXPIRED = "4000003200000002";
 
-    @Override
+
     public PaymentProcessorResponse charge(PaymentProcessorRequest request) {
 
         String pan = request.pan();

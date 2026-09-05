@@ -1,5 +1,6 @@
 package com.himanshu.razorpay.vault_service.service;
 
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorResponse;
 import com.himanshu.razorpay.common_library.entity.Money;
 import com.himanshu.razorpay.vault_service.dto.request.TokenizeRequest;
 import com.himanshu.razorpay.vault_service.dto.response.TokenizeResponse;

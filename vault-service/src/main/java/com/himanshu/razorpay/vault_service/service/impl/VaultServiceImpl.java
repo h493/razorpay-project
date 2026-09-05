@@ -1,6 +1,8 @@
 package com.himanshu.razorpay.vault_service.service.impl;
 
 
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorResponse;
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorRequest;
 import com.himanshu.razorpay.common_library.entity.Money;
 import com.himanshu.razorpay.common_library.enums.CardBrand;
 import com.himanshu.razorpay.common_library.exception.ResourceNotFoundException;
@@ -10,6 +12,7 @@ import com.himanshu.razorpay.vault_service.dto.request.TokenizeRequest;
 import com.himanshu.razorpay.vault_service.dto.response.TokenizeResponse;
 import com.himanshu.razorpay.vault_service.entity.CardToken;
 import com.himanshu.razorpay.vault_service.entity.VaultCard;
+import com.himanshu.razorpay.vault_service.processor.CardPaymentProcessor;
 import com.himanshu.razorpay.vault_service.repository.CardTokenRepository;
 import com.himanshu.razorpay.vault_service.repository.VaultCardRepository;
 import com.himanshu.razorpay.vault_service.service.VaultService;
@@ -33,7 +36,7 @@ public class VaultServiceImpl implements VaultService {
     private final CardTokenRepository cardTokenRepository;
     private final VaultCardRepository vaultCardRepository;
     private final BytesEncryptor dekEncrypter;
-    private final PaymentProcessorRouter paymentProcessorRouter;
+    private final CardPaymentProcessor cardPaymentProcessor;
 
     @Override
     @Transactional
@@ -89,7 +92,7 @@ public class VaultServiceImpl implements VaultService {
             PaymentProcessorRequest paymentProcessorRequest = PaymentProcessorRequest
                     .card(paymentId, pan, expiry, amount, methodDetails);
 
-            PaymentProcessorResponse paymentProcessorResponse = paymentProcessorRouter.charge(paymentProcessorRequest);
+            PaymentProcessorResponse paymentProcessorResponse = cardPaymentProcessor.charge(paymentProcessorRequest);
             log.info("Vault Charge Register , token = {}****", token.substring(0, 4));
 
             return paymentProcessorResponse;

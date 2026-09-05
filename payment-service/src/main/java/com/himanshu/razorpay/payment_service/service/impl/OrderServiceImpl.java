@@ -1,11 +1,13 @@
 package com.himanshu.razorpay.payment_service.service.impl;
 
 
+import com.himanshu.razorpay.common_library.dto.FindOrCreateCustomerRequest;
 import com.himanshu.razorpay.common_library.enums.EventAggregateType;
 import com.himanshu.razorpay.common_library.enums.OrderStatus;
 import com.himanshu.razorpay.common_library.exception.BusinessRuleViolationException;
 import com.himanshu.razorpay.common_library.exception.DuplicateResourceException;
 import com.himanshu.razorpay.common_library.exception.ResourceNotFoundException;
+import com.himanshu.razorpay.payment_service.client.CustomerServiceClient;
 import com.himanshu.razorpay.payment_service.dto.request.CreateOrderRequest;
 import com.himanshu.razorpay.payment_service.dto.response.OrderResponse;
 import com.himanshu.razorpay.payment_service.dto.response.PaymentResponse;
@@ -36,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final OrderMapper orderMapper;
-    private final CustomerService customerService;
+    private final CustomerServiceClient customerServiceClient;
     private final OutboxEventPublisher eventPublisher;
 
     @Value("${payment.order.default-order-expiry-minutes:30}")
@@ -51,11 +53,11 @@ public class OrderServiceImpl implements OrderService {
 
         UUID customerId = null;
         if(request.customer() != null){
-            customerId = customerService.findOrCreate(
-                    merchantId,
+            customerId = customerServiceClient.findOrCreate(
+                    new FindOrCreateCustomerRequest(merchantId,
                     request.customer().email(),
                     request.customer().name(),
-                    request.customer().phone()
+                    request.customer().phone())
             );
         }
 

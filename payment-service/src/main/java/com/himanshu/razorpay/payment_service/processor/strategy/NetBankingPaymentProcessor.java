@@ -3,8 +3,8 @@ package com.himanshu.razorpay.payment_service.processor.strategy;
 
 import com.himanshu.razorpay.common_library.util.RandomizerUtil;
 import com.himanshu.razorpay.payment_service.processor.PaymentProcessor;
-import com.himanshu.razorpay.payment_service.processor.dto.PaymentProcessorRequest;
-import com.himanshu.razorpay.payment_service.processor.dto.PaymentProcessorResponse;
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorRequest;
+import com.himanshu.razorpay.common_library.dto.PaymentProcessorResponse;
 import org.springframework.stereotype.Component;
 
 @Component

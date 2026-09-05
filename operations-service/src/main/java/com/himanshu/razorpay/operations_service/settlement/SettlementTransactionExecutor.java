@@ -1,14 +1,18 @@
 package com.himanshu.razorpay.operations_service.settlement;
 
 
+import com.himanshu.razorpay.common_library.dto.PaymentSettlementView;
 import com.himanshu.razorpay.common_library.dto.SettlementBankDetails;
 import com.himanshu.razorpay.common_library.entity.Money;
 import com.himanshu.razorpay.common_library.enums.EventAggregateType;
 import com.himanshu.razorpay.common_library.enums.SettlementStatus;
 import com.himanshu.razorpay.common_library.exception.ResourceNotFoundException;
+import com.himanshu.razorpay.operations_service.client.MerchantServiceClient;
+import com.himanshu.razorpay.operations_service.client.PaymentServiceClient;
 import com.himanshu.razorpay.operations_service.entity.Settlement;
 import com.himanshu.razorpay.operations_service.entity.SettlementPayment;
 import com.himanshu.razorpay.operations_service.entity.SettlementPaymentId;
+import com.himanshu.razorpay.operations_service.outbox.OutboxEventPublisher;
 import com.himanshu.razorpay.operations_service.repository.SettlementPaymentRepository;
 import com.himanshu.razorpay.operations_service.repository.SettlementRepository;
 import com.himanshu.razorpay.operations_service.settlement.dto.BankTransferResult;
@@ -33,25 +37,26 @@ public class SettlementTransactionExecutor {
     private static final double GST_RATE = 0.18;
 
 
-    private final PaymentLookupService paymentLookupService;
+    private final PaymentServiceClient paymentServiceClient;
     private final SettlementRepository settlementRepository;
     private final SettlementPaymentRepository settlementPaymentRepository;
-    private final MerchantLookupService merchantLookupService;
+    private final MerchantServiceClient merchantServiceClient;
     private final BankTransferProcessor bankTransferProcessor;
-    //TODO: publoisher inside its own db
     private final OutboxEventPublisher outboxEventPublisher;
 
     @Transactional
     public void processForMerchant(UUID merchantId, LocalDate settlementDate) {
-        List<Payment> unsettledPayments = paymentLookupService.findUnsettlementCapturedPayments(merchantId);
+        List<PaymentSettlementView> unsettledPayments = paymentServiceClient.findUnsettledCaptured(merchantId);
         if (unsettledPayments.isEmpty()) return;
 
         log.info("Processing {} unsettled payments for merchantId:{} on {} date",
                 unsettledPayments.size(), merchantId, settlementDate);
-        Money gross = unsettledPayments.stream()
-                .map(Payment::getAmount)
-                .reduce(Money::add)
-                .orElseThrow();
+        Long grossAmount = unsettledPayments.stream()
+                .map(PaymentSettlementView::amountUnits)
+                .reduce(Long::sum)
+                .orElse(0L);
+
+        Money gross = Money.of(grossAmount, unsettledPayments.getFirst().currency());
 
         long fee = Math.round(gross.getAmountUnits() * FEE_RATE);
         long gst = Math.round(fee * GST_RATE);
@@ -71,16 +76,22 @@ public class SettlementTransactionExecutor {
         settlementRepository.save(settlement);
         try {
             List<SettlementPayment> links = new ArrayList<>();
-            for (Payment p : unsettledPayments) {
+            for (PaymentSettlementView p : unsettledPayments) {
                 links.add(SettlementPayment.builder()
-                        .id(new SettlementPaymentId(settlement.getId(), p.getId()))
+                        .id(new SettlementPaymentId(settlement.getId(), p.paymentId()))
                         .settlement(settlement)
                         .build());
             }
 
             settlementPaymentRepository.saveAll(links);
 
-            SettlementBankDetails settlementBankDetails = merchantLookupService.getSettlementBankDetails(merchantId);
+            List<UUID> paymentIds = unsettledPayments.stream()
+                    .map(PaymentSettlementView::paymentId)
+                    .toList();
+            // call the payment service to mark these payments as settled
+            paymentServiceClient.markSettled(paymentIds);
+
+            SettlementBankDetails settlementBankDetails = merchantServiceClient.getSettlementBankDetails(merchantId);
             // call the bankTransferService to transfer netamount to merchant settlement bank details
             BankTransferResult bankTransferResult = bankTransferProcessor.initiate(settlement.getId(), merchantId,
                     netAmount, settlementBankDetails.accountNumber(), settlementBankDetails.ifsc());

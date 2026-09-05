@@ -1,4 +1,4 @@
-package com.himanshu.razorpay.payment_service.processor.dto;
+package com.himanshu.razorpay.common_library.dto;
 
 
 import com.himanshu.razorpay.common_library.entity.Money;

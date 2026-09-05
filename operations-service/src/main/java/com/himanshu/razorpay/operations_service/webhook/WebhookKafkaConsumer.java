@@ -4,6 +4,7 @@ package com.himanshu.razorpay.operations_service.webhook;
 import com.himanshu.razorpay.common_library.dto.WebhookTarget;
 import com.himanshu.razorpay.common_library.enums.WebhookEventStatus;
 import com.himanshu.razorpay.common_library.util.SignerUtil;
+import com.himanshu.razorpay.operations_service.client.MerchantServiceClient;
 import com.himanshu.razorpay.operations_service.entity.WebhookEvent;
 import com.himanshu.razorpay.operations_service.repository.WebhookEventRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WebhookKafkaConsumer {
 
-    private final MerchantLookupService merchantLookupService;
+    private final MerchantServiceClient merchantServiceClient;
     private final ObjectMapper objectMapper;
     private final SignerUtil signerUtil;
     private final WebhookEventRepository webhookEventRepository;
@@ -52,7 +53,7 @@ public class WebhookKafkaConsumer {
             }
 
             UUID merchantId = UUID.fromString(merchantIdRaw.toString());
-            List<WebhookTarget> targets = merchantLookupService.getActiveConfigsForEvent(merchantId, eventType);
+            List<WebhookTarget> targets = merchantServiceClient.getActiveConfigsForEvent(merchantId, eventType);
             if (targets.isEmpty()) {
                 log.debug("No webhook target was found, skipping event: {}", eventType);
                 ack.acknowledge();
