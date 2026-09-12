@@ -3,3 +3,4 @@ com/himanshu/razorpay/common_library/audit/SharedAuditAutoConfiguration.java
 com/himanshu/razorpay/common_library/util/SharedSecurityAutoConfiguration.java
 com/himanshu/razorpay/common_library/config/SharedKafkaAutoConfiguration.java
 com/himanshu/razorpay/common_library/exception/SharedExceptionAutoConfiguration.java
+com/himanshu/razorpay/common_library/web/SharedWebFilterAutoConfiguration.java

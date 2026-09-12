@@ -1,4 +1,5 @@
-package com.himanshu.razorpay.merchant_service.cache;
+package com.himanshu.razorpay.common_library.cache;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import java.util.Optional;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class RedisApiKeyCache implements ApiKeyCache{
+public class RedisApiKeyCache implements ApiKeyCache {
 
     private static final String API_KEY_CACHE_PREFIX = "apiKey:";
     private static final Duration TTL = Duration.ofMinutes(5);

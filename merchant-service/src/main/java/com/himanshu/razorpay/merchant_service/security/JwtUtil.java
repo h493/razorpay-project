@@ -33,21 +33,4 @@ public class JwtUtil {
                 .signWith(getSecretKey())
                 .compact();
     }
-
-    public Claims verifyAccessToken(String accessToken){
-        return Jwts.parser()
-                .verifyWith(getSecretKey())
-                .build()
-                .parseSignedClaims(accessToken)
-                .getPayload();
-    }
-
-    public String extractRole(Claims claims){
-        return claims.get("role", String.class);
-    }
-
-    public UUID extractMerchantId(Claims claims){
-        String merchantId =  claims.get("merchant_id", String.class);
-        return UUID.fromString(merchantId);
-    }
 }

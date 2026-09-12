@@ -1,4 +1,4 @@
-package com.himanshu.razorpay.merchant_service.security;
+package com.himanshu.razorpay.payment_service.config;
 
 import com.himanshu.razorpay.common_library.idempotency.IdempotencyFilter;
 import jakarta.servlet.Filter;
@@ -22,11 +22,5 @@ public class WebSecurityConfig {
         registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE+2);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-
-        return new BCryptPasswordEncoder();
     }
 }

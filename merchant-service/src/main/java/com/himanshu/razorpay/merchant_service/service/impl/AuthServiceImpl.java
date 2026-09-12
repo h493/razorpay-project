@@ -3,6 +3,7 @@ package com.himanshu.razorpay.merchant_service.service.impl;
 
 import com.himanshu.razorpay.common_library.enums.MerchantStatus;
 import com.himanshu.razorpay.common_library.enums.UserRole;
+import com.himanshu.razorpay.common_library.exception.BusinessRuleViolationException;
 import com.himanshu.razorpay.common_library.exception.DuplicateResourceException;
 import com.himanshu.razorpay.common_library.exception.ResourceNotFoundException;
 import com.himanshu.razorpay.merchant_service.dto.request.LoginRequest;
@@ -18,8 +19,6 @@ import com.himanshu.razorpay.merchant_service.security.JwtUtil;
 import com.himanshu.razorpay.merchant_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ public class AuthServiceImpl implements AuthService {
     private final MerchantRepository merchantRepository;
     private final MerchantMapper merchantMapper;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -63,12 +61,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
-
         AppUser appUser = appUserRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("USER", request.email()));
+
+        if(!passwordEncoder.matches(request.password(), appUser.getPasswordHash())) {
+            throw new BusinessRuleViolationException("INVALID_CREDENTIALS", "Invalid email or password");
+        }
 
         String token = jwtUtil.generateAccessToken(request.email(), appUser.getMerchant().getId(), appUser.getRole().name());
 

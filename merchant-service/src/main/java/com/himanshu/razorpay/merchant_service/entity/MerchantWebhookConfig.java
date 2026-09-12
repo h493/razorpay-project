@@ -33,6 +33,7 @@ public class MerchantWebhookConfig extends BaseEntity {
     private String webhookSecret;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean enabled = true;
 
     private String eventTypes; // comma separated list of event types, e.g. payment.captured,payment.failed
