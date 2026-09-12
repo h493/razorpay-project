@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -18,8 +17,8 @@ public class WebSecurityConfig {
 
     @Bean
     public FilterRegistrationBean<Filter> idempotencyFilterRegistration() {
-        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE+2);
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>(idempotencyFilter);
+        registrationBean.setOrder(IdempotencyFilter.ORDER);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }

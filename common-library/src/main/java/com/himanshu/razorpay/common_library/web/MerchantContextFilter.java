@@ -17,6 +17,11 @@ public class MerchantContextFilter extends OncePerRequestFilter {
     public static final String MERCHANT_ID_HEADER = "X-Merchant-Id";
     public static final String KEY_ID_HEADER = "X-Key-Id";
 
+    // Must run after Boot's RequestContextFilter (order -105): MerchantContext is a
+    // request-scoped proxy, so touching it before the request is bound to
+    // RequestContextHolder fails with "No thread-bound request found".
+    public static final int ORDER = -100;
+
     private final MerchantContext merchantContext;
 
     @Override

@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="API Gateway Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="api-gateway-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.api_gateway_service.ApiGatewayServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

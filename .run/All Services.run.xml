@@ -6,6 +6,7 @@
     <toRun name="Payment Service" type="SpringBootApplicationConfigurationType" />
     <toRun name="Vault Service" type="SpringBootApplicationConfigurationType" />
     <toRun name="Operations Service" type="SpringBootApplicationConfigurationType" />
+    <toRun name="API Gateway Service" type="SpringBootApplicationConfigurationType" />
     <method v="2" />
   </configuration>
 </component>

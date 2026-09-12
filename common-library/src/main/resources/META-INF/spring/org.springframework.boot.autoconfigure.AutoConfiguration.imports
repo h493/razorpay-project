@@ -1,0 +1,6 @@
+com.himanshu.razorpay.common_library.idempotency.SharedResilienceAutoConfiguration
+com.himanshu.razorpay.common_library.audit.SharedAuditAutoConfiguration
+com.himanshu.razorpay.common_library.util.SharedSecurityAutoConfiguration
+com.himanshu.razorpay.common_library.config.SharedKafkaAutoConfiguration
+com.himanshu.razorpay.common_library.exception.SharedExceptionAutoConfiguration
+com.himanshu.razorpay.common_library.web.SharedWebFilterAutoConfiguration

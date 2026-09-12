@@ -26,6 +26,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class IdempotencyFilter extends OncePerRequestFilter {
 
+    // Runs right after MerchantContextFilter so the merchant id is already populated,
+    // and still below REQUEST_WRAPPER_FILTER_MAX_ORDER (0) since it wraps the response.
+    public static final int ORDER = -99;
+
     private static final Set<String> GUARDED_METHODS = Set.of("POST", "PUT", "PATCH");
     private static final Duration IN_PROGRESS_TTL = Duration.ofSeconds(30);
     private static final Duration COMPLETED_TTL = Duration.ofHours(24);

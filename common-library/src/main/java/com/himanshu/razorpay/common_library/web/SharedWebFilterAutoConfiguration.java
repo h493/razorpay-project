@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.web.filter.RequestContextFilter;
 
 @AutoConfiguration
 public class SharedWebFilterAutoConfiguration {
@@ -15,7 +16,15 @@ public class SharedWebFilterAutoConfiguration {
     @ConditionalOnProperty(name = "app.security.trust-inbound-headers", havingValue = "true", matchIfMissing = true)
     public FilterRegistrationBean<Filter> merchantContextRegistration(MerchantContext merchantContext){
         FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>(new MerchantContextFilter(merchantContext));
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registrationBean.setOrder(MerchantContextFilter.ORDER);
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> requestContextFilterRegisteration(){
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>(new RequestContextFilter());
+        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
