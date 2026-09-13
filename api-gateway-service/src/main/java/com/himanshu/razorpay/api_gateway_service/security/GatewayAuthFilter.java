@@ -47,9 +47,9 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
         try {
             Map<String, String> identityHeaders = Map.of();
             if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-                identityHeaders = apiKeyAuthHandler.authentication(authHeader, response);
+                identityHeaders = jwtAuthHandler.authenticate(authHeader.substring(BEARER_PREFIX.length()));
             } else if (authHeader != null && authHeader.startsWith(BASIC_PREFIX)) {
-                identityHeaders = jwtAuthHandler.authenticate(authHeader.substring(BASIC_PREFIX.length()));
+                identityHeaders = apiKeyAuthHandler.authentication(authHeader, response);
             }else{
                 reject(response, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Missing or invalid Authorization header");
                 return;
