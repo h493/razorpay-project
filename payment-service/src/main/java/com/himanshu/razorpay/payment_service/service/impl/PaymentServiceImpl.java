@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,8 +44,17 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentAuthorizationRecorder paymentAuthorizationRecorder;
 
     @Override
-    public PaymentResponse initiate(UUID merchantId, PaymentInitRequest request) {
-        Payment payment = paymentAuthorizationRecorder.recordPayment(merchantId, request);
+    public PaymentResponse initiate(UUID merchantId, PaymentInitRequest request, String idempotencyKey) {
+
+        if(idempotencyKey != null){
+            Optional<PaymentResponse> existingAttempt = findExistingAttempt(merchantId, idempotencyKey);
+            if(existingAttempt.isPresent()){
+                log.info("Found existing payment attempt for merchantId: {}, idempotencyKey: {}", merchantId, idempotencyKey);
+                return existingAttempt.get();
+            }
+        }
+
+        Payment payment = paymentAuthorizationRecorder.recordPayment(merchantId, request, idempotencyKey);
         OrderRecord order = payment.getOrder();
 
         PaymentRequest paymentRequest = new PaymentRequest(payment.getId(), request.orderId(),
@@ -59,6 +69,12 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         return paymentAuthorizationRecorder.applyGatewayResult(payment.getId(), result);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PaymentResponse> findExistingAttempt(UUID merchantId, String idempotencyKey) {
+        return paymentRepository.findByMerchantIdAndIdempotencyKey(merchantId, idempotencyKey)
+                .map(paymentMapper::toResponse);
     }
 
     @Override

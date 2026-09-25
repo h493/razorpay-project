@@ -36,7 +36,7 @@ public class PaymentAuthorizationRecorder {
     private final PaymentMapper paymentMapper;
 
     @Transactional
-    public Payment recordPayment(UUID merchantId, PaymentInitRequest request){
+    public Payment recordPayment(UUID merchantId, PaymentInitRequest request, String idempotencyKey){
         OrderRecord order = orderRepository.findByIdAndMerchantIdForUpdate(request.orderId(), merchantId)
                 .orElseThrow(() -> new ResourceNotFoundException("ORDER", request.orderId()));
 
@@ -54,7 +54,7 @@ public class PaymentAuthorizationRecorder {
                 .amount(order.getAmount())
                 .status(PaymentStatus.CREATED)
                 .method(request.method())
-                .idempotencyKey(UUID.randomUUID().toString()) //TODO
+                .idempotencyKey(idempotencyKey != null ? idempotencyKey : UUID.randomUUID().toString())
                 .methodDetails(request.methodDetails())
                 .build();
 
