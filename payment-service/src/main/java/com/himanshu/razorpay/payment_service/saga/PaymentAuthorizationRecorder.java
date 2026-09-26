@@ -63,6 +63,7 @@ public class PaymentAuthorizationRecorder {
         return payment;
     }
 
+    @Transactional
     public PaymentResponse compensateAuthorizationFailure(UUID paymentId,
                                                           String errorCode, String errorDescription){
         Payment payment = paymentRepository.findByIdForUpdate(paymentId)

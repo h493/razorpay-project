@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - infra/namespace.yaml
+  - infra/configmap.yaml
+  - stateful/postgres.yaml
+  - stateful/redis.yaml
+  - stateful/kafka.yaml
+  - stateful/zipkin.yaml
+  - stateful/prometheus.yaml
+  - stateful/grafana.yaml
+  - services/config-service.yaml
+  - services/api-gateway.yaml
+  - services/merchant-service.yaml
+  - services/payment-service.yaml
+  - services/operations-service.yaml
+  - services/vault-service.yaml
+
+secretGenerator:
+  - name: app-secrets
+    namespace: razorpay-core
+    envs:
+      - k8s-secrets.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+# Pin exact image digests: GKE pulls Docker Hub through mirror.gcr.io, which can serve a stale :latest.
+# After pushing new images, refresh these with k8s/pin-images.sh
+images:
+  - name: himanshuchhikara21/razorpay-config-service
+    digest: sha256:ebf1a6473b0229066810e0c42694b236f146f52c3b17031741689331a287629b
+  - name: himanshuchhikara21/razorpay-api-gateway-service
+    digest: sha256:83bd096701fe02622670ace3999cf34740caf732b9881a93fa21007dc43a11fe
+  - name: himanshuchhikara21/razorpay-merchant-service
+    digest: sha256:41d68a0396c46758ced6423798ed2a8fce4f866b85684f57994298590935cf5f
+  - name: himanshuchhikara21/razorpay-payment-service
+    digest: sha256:da7157f94440e4184256834d5ae3a5dd2f77cf7514e0ca0b89c3647fe0f19c10
+  - name: himanshuchhikara21/razorpay-operations-service
+    digest: sha256:4761a71aa83c983cc4f92a0120478d66178d0b2bf2261037a1ec67dd4f48ab15
+  - name: himanshuchhikara21/razorpay-vault-service
+    digest: sha256:2bdf48bd6deb32c63bde69da00aee4a30b1f5826f2182eef2b3db5fc070dc2c1

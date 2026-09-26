@@ -1,0 +1,690 @@
+{
+  "info": {
+    "name": "Razorpay Clone - GKE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run top to bottom. Each step saves ids/tokens into the 'Razorpay GKE' environment for the next one."
+  },
+  "item": [
+    {
+      "name": "0. Gateway health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actuator",
+            "health"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"gateway UP\", () => pm.expect(pm.response.json().status).to.eql(\"UP\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Signup merchant",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/auth/signup",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "auth",
+            "signup"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Merchant\",\n  \"email\": \"{{merchantEmail}}\",\n  \"password\": \"{{merchantPassword}}\",\n  \"businessName\": \"Test Merchant Pvt Ltd\",\n  \"businessType\": \"PRIVATE_LIMITED\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// first run: generate a fresh test merchant (clear merchantEmail in the environment to make another)",
+              "if (!pm.environment.get(\"merchantEmail\")) {",
+              "    pm.environment.set(\"merchantEmail\", `merchant-${Date.now()}@example.com`);",
+              "    pm.environment.set(\"merchantPassword\", \"Test-\" + Math.random().toString(36).slice(2, 12));",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"merchantId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Login (JWT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{merchantEmail}}\",\n  \"password\": \"{{merchantPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"accessToken\", body.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create API key",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/merchants/api-keys",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "merchants",
+            "api-keys"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"environment\": \"TEST\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "keySecret is only returned once; it is saved into the environment for the Basic-auth requests below."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"keyId\", body.keyId);",
+              "pm.environment.set(\"keySecret\", body.keySecret);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Register webhook (dummy receiver in operations-service)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/merchants/webhooks",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "merchants",
+            "webhooks"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"targetUrl\": \"http://operations-service/webhook/success\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"webhookConfigId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Create order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {\n    \"amountUnits\": 50000,\n    \"currency\": \"INR\"\n  },\n  \"receipt\": \"receipt-{{$guid}}\",\n  \"customer\": {\n    \"name\": \"Test Customer\",\n    \"email\": \"customer@example.com\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"orderId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. UPI payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "payments"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"method\": \"UPI\",\n  \"methodDetails\": {\n    \"vpa\": \"test@okaxis\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Returns AUTHORIZING. The bank simulator captures it within ~5s (80% approve, 20% 'Simulated Bank Decline')."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"idempotencyKey\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"paymentId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Replay UPI payment (same idempotency key)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "payments"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"method\": \"UPI\",\n  \"methodDetails\": {\n    \"vpa\": \"test@okaxis\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"same payment returned\", () => pm.expect(pm.response.json().id).to.eql(pm.environment.get(\"paymentId\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Tokenize card (vault)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/vault/tokenize",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "vault",
+            "tokenize"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pan\": \"4111111111111111\",\n  \"cvv\": \"123\",\n  \"expiryMonth\": 12,\n  \"expiryYear\": 2030,\n  \"cardHolderName\": \"Test Customer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"cardToken\", body.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Create order (for card)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {\n    \"amountUnits\": 50000,\n    \"currency\": \"INR\"\n  },\n  \"receipt\": \"receipt-{{$guid}}\",\n  \"customer\": {\n    \"name\": \"Test Customer\",\n    \"email\": \"customer@example.com\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"orderId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Card payment (payment -> vault)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "payments"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"method\": \"CARD\",\n  \"methodDetails\": {\n    \"token\": \"{{cardToken}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{keyId}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{keySecret}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"idempotencyKey\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.environment.set(\"paymentId\", body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Unauthenticated request (expect 401)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {\n    \"amountUnits\": 50000,\n    \"currency\": \"INR\"\n  },\n  \"receipt\": \"receipt-{{$guid}}\",\n  \"customer\": {\n    \"name\": \"Test Customer\",\n    \"email\": \"customer@example.com\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"rejected\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

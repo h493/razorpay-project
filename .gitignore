@@ -1,0 +1,4 @@
+.DS_Store
+# real k8s secrets - only the .example is committed
+k8s/k8s-secrets.env
+k8s/jmeter.log

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: razorpay-core
+data:
+  SPRING_PROFILES_ACTIVE: "k8s"
+  CONFIG_SERVER_URL: "http://config-service.razorpay-core.svc.cluster.local:8888"
+  SPRING_CLOUD_CONFIG_FAIL_FAST: "false"
+  SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS: "10"
+  SPRING_CLOUD_CONFIG_RETRY_INITIAL_INTERVAL: "3000"
+  # size the JVM heap off the container memory limit, leaving headroom for metaspace/threads
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0"
+  # Boot 4 no longer reads management.zipkin.tracing.endpoint (what the config repo sets); this is its replacement
+  MANAGEMENT_TRACING_EXPORT_ZIPKIN_ENDPOINT: "http://zipkin.razorpay-core.svc.cluster.local:9411/api/v2/spans"

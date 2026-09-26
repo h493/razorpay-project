@@ -2,4 +2,8 @@ spring:
   application:
     name: operations-service
   config:
-    import: configserver:http://localhost:8888
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  # WebhookKafkaConsumer takes an Acknowledgment and acks itself; that needs a MANUAL ack-mode container
+  kafka:
+    listener:
+      ack-mode: manual
