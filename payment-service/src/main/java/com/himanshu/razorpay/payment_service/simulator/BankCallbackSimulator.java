@@ -26,7 +26,7 @@ public class BankCallbackSimulator {
     private final SimulatorConfig simulatorConfig;
 
     @Scheduled(fixedDelayString = "${payment.simulator.poll-interval-ms:5000}")
-    @SchedulerLock(name = "payment-service-bank-callback-simulator", lockAtLeastFor = "10s", lockAtMostFor = "1s")
+    @SchedulerLock(name = "payment-service-bank-callback-simulator", lockAtLeastFor = "1s", lockAtMostFor = "10s")
     public void processCallBacks(){
 
         LocalDateTime globalWindow = LocalDateTime.now().minusSeconds(1);

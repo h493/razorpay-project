@@ -2,6 +2,7 @@
   <configuration default="false" name="Discovery Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="discovery-service" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.discovery_service.DiscoveryServiceApplication" />
+    <option name="VM_PARAMETERS" value="-Xms48m -Xmx160m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:ReservedCodeCacheSize=48m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

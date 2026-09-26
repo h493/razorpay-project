@@ -2,6 +2,7 @@
   <configuration default="false" name="Config Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="config-service" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.config_service.ConfigServiceApplication" />
+    <option name="VM_PARAMETERS" value="-Xms48m -Xmx160m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:ReservedCodeCacheSize=48m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -21,7 +21,7 @@ public class BankSettlementCallbackSimulator {
     private final SettlementTransactionExecutor settlementTransactionExecutor;
 
     @Scheduled(fixedDelayString = "5000")
-    @SchedulerLock(name = "operations-service-bank-settlement-simulator", lockAtLeastFor = "10s", lockAtMostFor = "1s")
+    @SchedulerLock(name = "operations-service-bank-settlement-simulator", lockAtLeastFor = "1s", lockAtMostFor = "10s")
     public void processCallbacks(){
         List<Settlement> settlements = settlementRepository
                 .findByStatus(SettlementStatus.TRANSFER_PENDING);

@@ -45,7 +45,7 @@ public class WebhookDeliveryScheduler {
     private int batchSize = 100;
 
     @Scheduled(fixedDelay = 1000)
-    @SchedulerLock(name = "operations-service-webhook-delivery-poll-and-deliver", lockAtLeastFor = "10s", lockAtMostFor = "1s")
+    @SchedulerLock(name = "operations-service-webhook-delivery-poll-and-deliver", lockAtLeastFor = "1s", lockAtMostFor = "10s")
     public void pollAndDeliver(){
         Set<UUID> due = retryQueue.pollDue(batchSize);
 
@@ -59,7 +59,7 @@ public class WebhookDeliveryScheduler {
     }
 
     @Scheduled(fixedDelay = 10000)
-    @SchedulerLock(name = "operations-service-webhook-delivery-reconcile-from-db", lockAtLeastFor = "10s", lockAtMostFor = "1s")
+    @SchedulerLock(name = "operations-service-webhook-delivery-reconcile-from-db", lockAtLeastFor = "1s", lockAtMostFor = "10s")
     public void reconcileFromDatabase(){
         LocalDateTime now = LocalDateTime.now();
         List<WebhookEvent> due = webhookEventRepository

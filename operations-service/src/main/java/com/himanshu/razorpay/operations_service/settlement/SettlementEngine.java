@@ -26,7 +26,7 @@ public class SettlementEngine {
     private final SettlementTransactionExecutor settlementTransactionExecutor;
 
     @Scheduled(cron = "0 0 23 * * *")
-    @SchedulerLock(name = "operations-service-settlement-engine", lockAtLeastFor = "2h", lockAtMostFor = "1m")
+    @SchedulerLock(name = "operations-service-settlement-engine", lockAtLeastFor = "1m", lockAtMostFor = "2h")
     public void runScheduled() {
         log.info("Nightly settlement running..");
         run();

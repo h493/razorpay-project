@@ -1,7 +1,12 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Merchant Service" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <envs>
+      <env name="SPRING_DATA_REDIS_PASSWORD" value="Pass@123" />
+      <env name="SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE" value="5" />
+    </envs>
     <module name="merchant-service" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.himanshu.razorpay.merchant_service.MerchantServiceApplication" />
+    <option name="VM_PARAMETERS" value="-Xms64m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:ReservedCodeCacheSize=48m" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

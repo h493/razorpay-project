@@ -3,3 +3,8 @@ spring:
     name: merchant-service
   config:
     import: configserver:http://localhost:8888
+
+# TEMP: merchant-service.yml in the config repo misspells this key as "webhoook.secret-encryption-key".
+# Once the typo is fixed there, the remote value takes precedence and this line can be deleted.
+webhook:
+  secret-encryption-key: ${webhoook.secret-encryption-key}

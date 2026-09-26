@@ -26,7 +26,7 @@ public class OutboxPoller {
     private final OutboxResultHandler outboxResultHandler;
 
     @Scheduled(fixedDelay = 5000)
-    @SchedulerLock(name = "operations-service-outbox-poller", lockAtLeastFor = "1m", lockAtMostFor = "1s")
+    @SchedulerLock(name = "operations-service-outbox-poller", lockAtLeastFor = "1s", lockAtMostFor = "1m")
     public void poll() {
 
         List<OutboxEvent> pendingEvents = outboxEventRepository

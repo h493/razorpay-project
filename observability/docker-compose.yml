@@ -1,0 +1,32 @@
+services:
+  zipkin:
+    image: openzipkin/zipkin:3.6.1
+    ports:
+      - "9411:9411"
+    environment:
+      # in-memory storage: cap heap and number of spans kept
+      JAVA_OPTS: "-Xms64m -Xmx192m"
+      MEM_MAX_SPANS: "20000"
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=2d
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      # services run on the host, not in this compose network (needed on Linux, automatic on Docker Desktop)
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:13.2.2
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./datasources:/etc/grafana/provisioning/datasources:ro
+      - ./dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus

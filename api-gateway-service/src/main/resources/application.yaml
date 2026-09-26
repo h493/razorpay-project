@@ -3,3 +3,7 @@ spring:
     name: api-gateway-service
   config:
     import: configserver:http://localhost:8888
+  # the gateway has no database, but JPA comes in via common-library and the shared
+  # config sets a Postgres driver; without a DataSource, JPA/JDBC auto-config backs off
+  autoconfigure:
+    exclude: org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
